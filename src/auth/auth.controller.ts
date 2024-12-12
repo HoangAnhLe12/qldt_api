@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, LogoutDto, RegisterDto } from './dto';
+import { GetVerifyCodeDto, LoginDto, RegisterDto, VerifyCodeDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
@@ -17,7 +17,20 @@ export class AuthController {
   }
 
   @Post('logout')
-  loout(@Body('token') token: LogoutDto) {
+  logout(@Body('token') token: string) {
     return this.authService.logout(token);
+  }
+
+  @Post('get-verify-code')
+  getVerifyCode(@Body() email: GetVerifyCodeDto) {
+    return this.authService.getVerifyCode(email.email);
+  }
+
+  @Post('check-verify-code')
+  async checkVerifyCode(@Body() verifyCodeDto: VerifyCodeDto) {
+    return await this.authService.verifyUserCode(
+      verifyCodeDto.email,
+      verifyCodeDto.code,
+    );
   }
 }

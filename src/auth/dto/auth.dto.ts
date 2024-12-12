@@ -4,6 +4,7 @@ import {
   IsString,
   MinLength,
   IsEnum,
+  Matches,
 } from 'class-validator';
 
 import { UserRole } from 'src/utils/enum';
@@ -36,7 +37,22 @@ export class LoginDto {
   password: string;
 }
 
-export class LogoutDto {
+export class GetVerifyCodeDto {
+  @IsEmail({}, { message: 'Email không hợp lệ.' })
+  @Matches(/hust\.edu\.vn$/, {
+    message: 'Email phải thuộc miền hust.edu.vn.',
+  })
+  email: string;
+}
+
+export class VerifyCodeDto {
+  @IsEmail({}, { message: 'Email không hợp lệ.' })
+  @Matches(/hust\.edu\.vn$/, {
+    message: 'Email phải thuộc miền hust.edu.vn.',
+  })
+  email: string;
+
+  @IsString()
   @IsNotEmpty()
-  token: string;
+  code: string;
 }

@@ -15,18 +15,19 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  username  String
-  password  String
-  email     String    @unique
-  role      Role
-  token     String?
-  active    Boolean   @default(true) // Trạng thái tài khoản
-  avatar    String? // Link đến avatar (nếu cần)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  Lecturer  Lecturer?
-  Student   Student?
+  id                Int                @id @default(autoincrement())
+  username          String
+  password          String
+  email             String             @unique
+  role              Role
+  token             String
+  active            Boolean            @default(false) // Trạng thái tài khoản
+  avatar            String // Link đến avatar (nếu cần)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  Lecturer          Lecturer?
+  Student           Student?
+  VerificationCodes VerificationCode[]
 
   @@map("users")
 }
@@ -37,10 +38,23 @@ enum Role {
   STUDENT // Sinh viên
 }
 
+model VerificationCode {
+  id        Int      @id @default(autoincrement())
+  userId    Int // ID người dùng liên kết
+  code      String // Mã xác thực
+  createdAt DateTime @default(now()) // Thời gian tạo mã
+  expiresAt DateTime // Thời gian hết hạn (nếu cần)
+  used      Boolean  @default(false) // Mã đã được sử dụng chưa
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("verification_codes")
+}
+
 model Lecturer {
   id          Int          @id @default(autoincrement())
   userId      Int          @unique
-  user        User         @relation(fields: [userId], references: [id])
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   classes     Class[]
   assignments Assignment[]
 
@@ -50,7 +64,7 @@ model Lecturer {
 model Student {
   id           Int                    @id @default(autoincrement())
   userId       Int                    @unique
-  user         User                   @relation(fields: [userId], references: [id])
+  user         User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
   classes      Class[]                @relation("StudentClasses")
   assignments  AssignmentSubmission[]
   attendance   AttendanceStatus[]
@@ -63,12 +77,17 @@ model Class {
   id            Int             @id @default(autoincrement())
   name          String
   description   String?
+  semester      String
+  maxStudents   Int
   lecturerId    Int
-  lecturer      Lecturer        @relation(fields: [lecturerId], references: [id])
+  lecturer      Lecturer        @relation(fields: [lecturerId], references: [id], onDelete: Cascade)
   students      Student[]       @relation("StudentClasses")
-  schedule      String?
+  schedule      String
+  timeStart     DateTime
+  timeEnd       DateTime
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
+  open          Boolean         @default(true)
   assignments   Assignment[]
   attendance    Attendance[]
   StudyMaterial StudyMaterial[]
@@ -82,9 +101,9 @@ model Assignment {
   title       String
   description String?
   lecturerId  Int
-  lecturer    Lecturer               @relation(fields: [lecturerId], references: [id])
+  lecturer    Lecturer               @relation(fields: [lecturerId], references: [id], onDelete: Cascade)
   classId     Int
-  class       Class                  @relation(fields: [classId], references: [id])
+  class       Class                  @relation(fields: [classId], references: [id], onDelete: Cascade)
   dueDate     DateTime
   submissions AssignmentSubmission[]
   graded      Boolean                @default(false)
@@ -97,9 +116,9 @@ model Assignment {
 model AssignmentSubmission {
   id           Int        @id @default(autoincrement())
   studentId    Int
-  student      Student    @relation(fields: [studentId], references: [id])
+  student      Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
   assignmentId Int
-  assignment   Assignment @relation(fields: [assignmentId], references: [id])
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
   grade        Float?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
@@ -110,7 +129,7 @@ model AssignmentSubmission {
 model Attendance {
   id      Int                @id @default(autoincrement())
   classId Int
-  class   Class              @relation(fields: [classId], references: [id])
+  class   Class              @relation(fields: [classId], references: [id], onDelete: Cascade)
   date    DateTime
   records AttendanceStatus[]
 
@@ -120,9 +139,9 @@ model Attendance {
 model AttendanceStatus {
   id           Int            @id @default(autoincrement())
   studentId    Int
-  student      Student        @relation(fields: [studentId], references: [id])
+  student      Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
   attendanceId Int
-  attendance   Attendance     @relation(fields: [attendanceId], references: [id])
+  attendance   Attendance     @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
   status       PresenceStatus
 
   @@map("attendance_status")
@@ -137,7 +156,7 @@ enum PresenceStatus {
 model StudyMaterial {
   id          Int          @id @default(autoincrement())
   classId     Int
-  class       Class        @relation(fields: [classId], references: [id])
+  class       Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
   title       String
   description String?
   link        String
@@ -155,9 +174,9 @@ enum MaterialType {
 model LeaveRequest {
   id           Int         @id @default(autoincrement())
   studentId    Int
-  student      Student     @relation(fields: [studentId], references: [id])
+  student      Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
   classId      Int
-  class        Class       @relation(fields: [classId], references: [id])
+  class        Class       @relation(fields: [classId], references: [id], onDelete: Cascade)
   reason       String
   status       LeaveStatus
   requestTime  DateTime    @default(now())
