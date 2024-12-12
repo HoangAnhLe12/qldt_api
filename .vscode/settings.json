@@ -1,0 +1,6 @@
+{
+  "editor.tabSize": 2, // Sử dụng 2 khoảng trắng
+  "editor.insertSpaces": true, // Sử dụng khoảng trắng thay vì tab
+  "editor.detectIndentation": false, // Tắt tự động phát hiện thụt dòng
+  "editor.formatOnSave": true // Tự động format khi lưu file
+}
