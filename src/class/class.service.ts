@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -17,6 +18,7 @@ export class ClassService {
     private configService: ConfigService,
   ) {}
   async createClass(createClass: CreateClassDto) {
+    
     return createClass;
   }
 

@@ -1,28 +1,37 @@
-import { IsDate, IsNegative, IsNotEmpty, IsNumber } from 'class-validator';
+/* eslint-disable prettier/prettier */
+import { IsDateString, IsNegative, IsNotEmpty, IsNumber, IsOptional, Max, MaxLength } from 'class-validator';
 
 export class CreateClassDto {
   @IsNotEmpty()
   token: string;
   @IsNotEmpty()
-  name: string;
+  @MaxLength(50)
+  className: string;
   @IsNotEmpty()
   semester: string;
-  description: string;
+  @IsOptional()
+  @MaxLength(255)
+  description?: string;
   @IsNotEmpty()
   @IsNegative()
   @IsNumber()
+  @Max(125)
   maxStudent: number;
-  @IsDate()
+  @IsDateString()
   @IsNotEmpty()
-  startDate: Date;
-  @IsDate()
+  startDate: string;
+  @IsDateString()
   @IsNotEmpty()
-  endDate: Date;
+  endDate: string;
 }
 
 export class GetClassListDto {
   @IsNotEmpty()
   token: string;
+  @IsNotEmpty()
+  userId: string;
+  @IsNotEmpty()
+  role: string;
 }
 
 export class EditClassDto {
@@ -30,19 +39,31 @@ export class EditClassDto {
   token: string;
   @IsNotEmpty()
   id: string;
-  name: string;
-  semester: string;
-  description: string;
+  @IsOptional()
+  @MaxLength(50)
+  className?: string;
+  @IsOptional()
+  @MaxLength(255)
+  description?: string;
+  @IsOptional()
   @IsNegative()
   @IsNumber()
-  maxStudent: number;
-  startDate: Date;
-  endDate: Date;
+  @Max(125)
+  maxStudent?: number;
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
+  @IsOptional()
+  endDate?: string;
+  @IsOptional()
+  classStatus?: string;
 }
 
 export class DeleteClassDto {
   @IsNotEmpty()
   token: string;
+  @IsNotEmpty()
+  userId: string;
   @IsNotEmpty()
   id: string;
 }
@@ -57,11 +78,15 @@ export class GetClassInfoDto {
 export class GetClassScheduleDto {
   @IsNotEmpty()
   token: string;
+  @IsNotEmpty()
+  id: string;
 }
 
 export class RegisterClassDto {
   @IsNotEmpty()
   token: string;
+  @IsNotEmpty()
+  userId: string;
   @IsNotEmpty()
   id: string;
 }

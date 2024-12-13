@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
@@ -6,7 +7,6 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginDto, RegisterDto } from './dto';
@@ -38,6 +38,7 @@ export class AuthService {
         HttpStatus.BAD_REQUEST,
       );
     }
+    const code = this.generateCode(6);
     // Tạo tài khoản
     const user = await this.prismaService.user.create({
       data: {
@@ -63,9 +64,17 @@ export class AuthService {
         },
       });
     }
+    await this.prismaService.verificationCode.create({
+      data: {
+        userId: user.id,
+        code: code,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000), // Mã hết hạn sau 10 phút
+      },
+    });
     return {
       status: 1000,
       message: 'Register successfully',
+      verifyCode: code,
     };
   }
   async signJwtToken(
