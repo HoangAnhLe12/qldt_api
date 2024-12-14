@@ -9,10 +9,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { LoginDto, RegisterDto } from './dto';
+import { ChangeInfoAfterSigninDto, LoginDto, RegisterDto } from './dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Role } from '@prisma/client';
+import { UploadService } from 'src/upload/upload.service';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +21,7 @@ export class AuthService {
     private prismaService: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private uploadService: UploadService,
   ) {}
   async register(registerDto: RegisterDto) {
     const { email, password, role: userRole } = registerDto;
@@ -77,6 +79,7 @@ export class AuthService {
       verifyCode: code,
     };
   }
+
   async signJwtToken(
     id: number,
     email: string,
@@ -95,6 +98,7 @@ export class AuthService {
       accessToken: jwtString,
     };
   }
+
   async getClassesByRole(userId: number, role: string) {
     if (role === 'LECTURER') {
       const lecturer = await this.prismaService.lecturer.findUnique({
@@ -117,6 +121,7 @@ export class AuthService {
       return student.classes;
     }
   }
+
   async login(loginDto: LoginDto) {
     const user = await this.prismaService.user.findUnique({
       where: { email: loginDto.email },
@@ -129,6 +134,15 @@ export class AuthService {
         },
         HttpStatus.NOT_FOUND,
       );
+    }
+    if (!user.status) {
+      throw new HttpException(
+        {
+          STATUS_CODES: 9996,
+          message: 'Người dùng đã bị khoá',
+        },
+        HttpStatus.BAD_REQUEST,
+      )
     }
 
     const passwordMatched = loginDto.password === user.password;
@@ -201,6 +215,16 @@ export class AuthService {
       );
     }
 
+    if(!user.status){
+      throw new HttpException(
+        {
+          STATUS_CODES: 9996,
+          message: 'Tài khoản đã bị khoá.',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
     // Tạo mã xác thực (6 ký tự, gồm chữ và số)
     const code = this.generateCode(6);
 
@@ -239,6 +263,16 @@ export class AuthService {
         {
           STATUS_CODES: 9995,
           message: 'User not found',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if(!user.status){
+      throw new HttpException(
+        {
+          STATUS_CODES: 9996,
+          message: 'Tài khoản đã bị khoá.',
         },
         HttpStatus.NOT_FOUND,
       );
@@ -302,4 +336,73 @@ export class AuthService {
       message: 'Xác nhận thành công.',
     };
   }
+  
+  async changeInfoAfterSignIn(body: ChangeInfoAfterSigninDto,file: Express.Multer.File,) {
+    try {
+      // Giải mã token
+      let decodedToken;
+      try {
+        decodedToken = this.jwtService.verify(body.token, {
+          secret: process.env.JWT_SECRET,
+        });
+      } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+          throw new HttpException('Token has expired', HttpStatus.UNAUTHORIZED);
+        }
+        throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
+      }
+
+      const { sub} = decodedToken;
+
+      const user = await this.prismaService.user.findUnique({
+        where: { id: sub },
+      });
+
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+
+      if(!user.status){
+        throw new HttpException(
+          {
+            STATUS_CODES: 9996,
+            message: 'Tài khoản đã bị khoá.',
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      let fileUrl;
+      let username;
+
+      if(body.userName !== user.username){
+        username = body.userName;
+      } else {
+        username = user.username;
+      }
+      if (file) {
+        // Upload file
+        const fileName = await this.uploadService.uploadFile(file);
+        fileUrl = this.uploadService.getFileUrl(fileName);
+      } else {
+       fileUrl = user.avatar;
+      }
+
+    // Cập nhật thông tin người dùng
+    await this.prismaService.user.update({
+      where: { id: user.id },
+      data: {
+        avatar: fileUrl,
+        username: username,
+      },
+    });
+
+    return {
+      statusCode: 1000,
+      message: 'Cập nhật thông tin thành công.',
+    };
+  }
+  catch (error) {
+    throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+  }
+}
 }

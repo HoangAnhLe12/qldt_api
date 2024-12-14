@@ -1,33 +1,33 @@
 /* eslint-disable prettier/prettier */
+import { MaterialType } from '@prisma/client';
 import { IsNotEmpty, IsOptional, MaxLength } from 'class-validator';
-import { MaterialType } from 'src/utils/enum';
 
-export class getMaterialList {
+export class getMaterialListDto {
   @IsNotEmpty()
   token: string;
   @IsNotEmpty()
-  classId: number;
+  classId: string;
 }
 
-export class getMaterialInfo {
+export class getMaterialInfoDto {
   @IsNotEmpty()
   token: string;
   @IsNotEmpty()
-  materialId: number;
+  materialId: string;
 }
 
-export class deleteMaterial {
+export class deleteMaterialDto {
   @IsNotEmpty()
   token: string;
   @IsNotEmpty()
-  materialId: number;
+  materialId: string;
 }
 
-export class editMaterial {
+export class editMaterialDto {
   @IsNotEmpty()
   token: string;
   @IsNotEmpty()
-  materialId: number;
+  materialId: string;
   @IsOptional()
   @MaxLength(25)
   title?: string;
@@ -35,16 +35,18 @@ export class editMaterial {
   @MaxLength(100)
   description?: string;
   @IsOptional()
+  link?: string;
+  @IsOptional()
   type?: MaterialType;
 }
 
-export class createMaterial {
+export class createMaterialDto {
   @IsNotEmpty()
   token: string;
   @IsNotEmpty()
-  userId: number;
+  userId: string;
   @IsNotEmpty()
-  classId: number;
+  classId: string;
   @IsNotEmpty()
   @MaxLength(25)
   title: string;

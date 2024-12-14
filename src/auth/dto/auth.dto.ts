@@ -6,6 +6,7 @@ import {
   MinLength,
   IsEnum,
   Matches,
+  IsOptional,
 } from 'class-validator';
 
 import { UserRole } from 'src/utils/enum';
@@ -56,4 +57,13 @@ export class VerifyCodeDto {
   @IsString()
   @IsNotEmpty()
   code: string;
+}
+
+export class ChangeInfoAfterSigninDto {
+  @IsNotEmpty()
+  token: string;
+  @IsNotEmpty()
+  userName: string;
+  @IsOptional()
+  avatar: string;
 }

@@ -1,5 +1,21 @@
 /* eslint-disable prettier/prettier */
-import { IsDateString, IsNegative, IsNotEmpty, IsNumber, IsOptional, Max, MaxLength } from 'class-validator';
+import { IsBoolean, IsDateString,  IsNotEmpty, IsNumber, IsOptional, IsPositive, Max, MaxLength, Validate, ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
+import { ClassType } from 'src/utils/enum';
+@ValidatorConstraint({ name: 'IsTimeEndAfterTimeStart', async: false })
+export class IsTimeEndAfterTimeStart implements ValidatorConstraintInterface {
+  validate(timeEnd: string, args: ValidationArguments): boolean {
+    const body = args.object as any; // Lấy toàn bộ DTO object
+    const timeStart = new Date(body.timeStart); // Chuyển đổi timeStart thành Date
+    const end = new Date(timeEnd); // Chuyển đổi timeEnd thành Date
+
+    return end >= timeStart; // Kiểm tra timeEnd >= timeStart
+  }
+
+  defaultMessage(): string {
+    return 'timeEnd must be greater than or equal to timeStart';
+  }
+}
+
 
 export class CreateClassDto {
   @IsNotEmpty()
@@ -9,27 +25,31 @@ export class CreateClassDto {
   className: string;
   @IsNotEmpty()
   semester: string;
+  @IsNotEmpty()
+  type: ClassType;
   @IsOptional()
   @MaxLength(255)
   description?: string;
   @IsNotEmpty()
-  @IsNegative()
+  @IsPositive()
   @IsNumber()
   @Max(125)
   maxStudent: number;
   @IsDateString()
   @IsNotEmpty()
-  startDate: string;
+  timeStart: string;
   @IsDateString()
   @IsNotEmpty()
-  endDate: string;
+  @Validate(IsTimeEndAfterTimeStart)
+  timeEnd: string;
 }
 
 export class GetClassListDto {
   @IsNotEmpty()
   token: string;
   @IsNotEmpty()
-  userId: string;
+  @IsNumber()
+  userId: number;
   @IsNotEmpty()
   role: string;
 }
@@ -38,7 +58,7 @@ export class EditClassDto {
   @IsNotEmpty()
   token: string;
   @IsNotEmpty()
-  id: string;
+  classId: number;
   @IsOptional()
   @MaxLength(50)
   className?: string;
@@ -46,26 +66,35 @@ export class EditClassDto {
   @MaxLength(255)
   description?: string;
   @IsOptional()
-  @IsNegative()
+  type?: ClassType;
+  @IsOptional()
+  @IsPositive()
   @IsNumber()
   @Max(125)
   maxStudent?: number;
   @IsOptional()
   @IsDateString()
-  startDate?: string;
+  timeStart?: string;
   @IsOptional()
-  endDate?: string;
+  @IsDateString()
+  @Validate(IsTimeEndAfterTimeStart)
+  timeEnd?: string;
   @IsOptional()
-  classStatus?: string;
+  semester?: string;
+  @IsOptional()
+  schedule?: Date[];
+  @IsOptional()
+  @IsBoolean()
+  classStatus?: boolean;
 }
 
 export class DeleteClassDto {
   @IsNotEmpty()
   token: string;
   @IsNotEmpty()
-  userId: string;
+  userId: number;
   @IsNotEmpty()
-  id: string;
+  classId: number;
 }
 
 export class GetClassInfoDto {
@@ -73,6 +102,17 @@ export class GetClassInfoDto {
   token: string;
   @IsNotEmpty()
   id: string;
+}
+
+export class AddMemberDto {
+  @IsNotEmpty()
+  token: string;
+  @IsNotEmpty()
+  @IsNumber()
+  userId: number;
+  @IsNotEmpty()
+  @IsNumber()
+  classId: number;
 }
 
 export class GetClassScheduleDto {

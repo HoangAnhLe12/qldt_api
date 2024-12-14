@@ -11,6 +11,10 @@ import { AssignmentModule } from './assignment/assignment.module';
 import { ConversationModule } from './conversation/conversation.module';
 import { NotificationModule } from './notification/notification.module';
 import { SystemModule } from './system/system.module';
+import { UploadService } from './upload/upload.service';
+import { UploadController } from './upload/upload.controller';
+import { UploadModule } from './upload/upload.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -26,6 +30,10 @@ import { SystemModule } from './system/system.module';
     ConversationModule,
     NotificationModule,
     SystemModule,
+    UploadModule,
+    UserModule,
   ],
+  providers: [UploadService],
+  controllers: [UploadController],
 })
 export class AppModule {}

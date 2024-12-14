@@ -4,6 +4,13 @@ export enum UserRole {
   STUDENT = 'STUDENT',
 }
 
+export enum ClassType {
+  LT,
+  BT,
+  TN,
+  LT_BT,
+}
+
 export enum LeaveStatus {
   DANG_XU_LY,
   DA_DUYET,

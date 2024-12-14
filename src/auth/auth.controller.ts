@@ -1,7 +1,8 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { GetVerifyCodeDto, LoginDto, RegisterDto, VerifyCodeDto } from './dto';
+import { ChangeInfoAfterSigninDto, GetVerifyCodeDto, LoginDto, RegisterDto, VerifyCodeDto } from './dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('auth')
 export class AuthController {
@@ -33,5 +34,13 @@ export class AuthController {
       verifyCodeDto.email,
       verifyCodeDto.code,
     );
+  }
+  @Post('change-info-after-signin')
+  @UseInterceptors(FileInterceptor('file')) // Xử lý file từ FormData
+  async editMaterial(
+    @Body() body: ChangeInfoAfterSigninDto, // Lấy thông tin JSON
+    @UploadedFile() file: Express.Multer.File, // Xử lý file từ FormData
+  ) {
+    return this.authService.changeInfoAfterSignIn(body, file);
   }
 }

@@ -2,6 +2,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ClassService } from './class.service';
 import {
+  AddMemberDto,
   CreateClassDto,
   DeleteClassDto,
   EditClassDto,
@@ -19,18 +20,23 @@ export class ClassController {
   }
 
   @Post('get-class-list')
-  getClassList(@Body() token: GetClassListDto) {
-    return this.classService.getClassList(token.token);
+  getClassList(@Body() body: GetClassListDto) {
+    return this.classService.getClassList(body);
   }
 
   @Post('edit-class')
-  editClass(@Body('token') body: EditClassDto) {
+  editClass(@Body() body: EditClassDto) {
     return this.classService.editClass(body);
   }
 
   @Post('delete-class')
-  deleteClass(@Body() token: DeleteClassDto) {
-    return this.classService.deleteClass(token);
+  deleteClass(@Body() body: DeleteClassDto) {
+    return this.classService.deleteClass(body);
+  }
+
+  @Post('add-member')
+  addMember(@Body() body: AddMemberDto) {
+    return this.classService.addMember(body);
   }
 
   @Post('get-class-info')

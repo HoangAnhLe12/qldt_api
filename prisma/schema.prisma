@@ -23,6 +23,9 @@ model User {
   token             String
   active            Boolean            @default(false) // Trạng thái tài khoản
   avatar            String // Link đến avatar (nếu cần)
+  phone             String? // Số điện thoại (nếu cần)
+  address           String? // Địa chỉ (nếu cần)
+  status            Boolean            @default(true)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   Lecturer          Lecturer?
@@ -78,11 +81,12 @@ model Class {
   name          String
   description   String?
   semester      String
+  type          ClassType
   maxStudents   Int
   lecturerId    Int
   lecturer      Lecturer        @relation(fields: [lecturerId], references: [id], onDelete: Cascade)
   students      Student[]       @relation("StudentClasses")
-  schedule      String
+  schedule      DateTime[]
   timeStart     DateTime
   timeEnd       DateTime
   createdAt     DateTime        @default(now())
@@ -94,6 +98,13 @@ model Class {
   LeaveRequest  LeaveRequest[]
 
   @@map("classes")
+}
+
+enum ClassType {
+  LT
+  BT
+  TN
+  LT_BT
 }
 
 model Assignment {
