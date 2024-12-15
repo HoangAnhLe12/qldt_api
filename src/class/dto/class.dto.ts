@@ -101,7 +101,7 @@ export class GetClassInfoDto {
   @IsNotEmpty()
   token: string;
   @IsNotEmpty()
-  id: string;
+  classId: string;
 }
 
 export class AddMemberDto {
@@ -119,7 +119,7 @@ export class GetClassScheduleDto {
   @IsNotEmpty()
   token: string;
   @IsNotEmpty()
-  id: string;
+  classId: string;
 }
 
 export class RegisterClassDto {

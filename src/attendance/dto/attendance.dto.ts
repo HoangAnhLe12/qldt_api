@@ -1,36 +1,58 @@
 /* eslint-disable prettier/prettier */
-import { IsArray, IsDateString, IsNotEmpty } from "class-validator";
-import { PresenceStatus } from "src/utils/enum";
+import { IsArray, IsDateString, IsNotEmpty, registerDecorator, ValidationArguments, ValidationOptions } from "class-validator";
 
-export class takeAttendanceDto {
+// Custom decorator để kiểm tra ngày không phải là quá khứ
+function IsNotInThePast(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'isNotInThePast',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: any) {
+          const now = new Date();
+          const inputDate = new Date(value);
+          return inputDate >= now; // Ngày phải lớn hơn hoặc bằng ngày hiện tại
+        },
+        defaultMessage(args: ValidationArguments) {
+          return `${args.property} must not be in the past`;
+        },
+      },
+    });
+  };
+}
+
+export class TakeAttendanceDto {
   @IsNotEmpty()
   token: string;
   @IsNotEmpty()
   classId: string;
   @IsDateString()
+  @IsNotInThePast({ message: 'Date must not be in the past' })
   date: string;
   @IsNotEmpty()
   @IsArray()
   students: string[];
 }
 
-export class getAttendanceRecordDto {
+export class GetAttendanceRecordDto {
   @IsNotEmpty()
   token: string;
   @IsNotEmpty()
   classId: string;
 }
 
-export class setAttendanceRecordDto {
+export class SetAttendanceStatusDto {
   @IsNotEmpty()
   token: string;
   @IsNotEmpty()
-  attandanceId: string;
+  attendanceId: string;
   @IsNotEmpty()
-  status: PresenceStatus;
+  newStudentsList: string[];
 }
 
-export class getAttendanceListDto {
+export class GetAttendanceListDto {
   @IsNotEmpty()
   token: string;
   @IsNotEmpty()

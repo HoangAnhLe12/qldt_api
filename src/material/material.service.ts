@@ -37,6 +37,20 @@ export class MaterialService {
 
       const userId = parseInt(body.userId, 10); 
       const classId = parseInt(body.classId, 10); 
+
+      if (Number.isNaN(userId)) {
+        throw new HttpException(
+          'Khong tim thay nguoi dung nay',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      if (Number.isNaN(classId)) {
+        throw new HttpException(
+          'Khong tim thay lop hoc nay',
+          HttpStatus.NOT_FOUND,
+        );
+      }
       
       if (role !== 'LECTURER' || sub !== userId) {
         throw new HttpException(
@@ -110,6 +124,13 @@ export class MaterialService {
       const { sub, role } = decodedToken;
       const materialId = parseInt(body.materialId, 10);
 
+      if (Number.isNaN(materialId)) {
+        throw new HttpException(
+          'Khong tim thay tai lieu hoc nay',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
       if (role !== 'LECTURER') {
         throw new HttpException(
           'You are not authorized to edit study material',
@@ -180,6 +201,13 @@ export class MaterialService {
 
     const { sub, role } = decodedToken;
     const materialId = parseInt(body.materialId, 10);
+
+    if (Number.isNaN(materialId)) {
+      throw new HttpException(
+        'Khong tim thay tai lieu hoc nay',
+        HttpStatus.NOT_FOUND,
+      );
+    }
 
     if (role !== 'LECTURER') {
       throw new HttpException(
@@ -306,6 +334,13 @@ export class MaterialService {
 
       const { sub, role } = decodedToken;
       const materialId = parseInt(body.materialId, 10);
+
+      if (Number.isNaN(materialId)) {
+        throw new HttpException(
+          'Khong tim thay tai lieu hoc nay',
+          HttpStatus.NOT_FOUND,
+        );
+      }
 
       const material = await this.prismaService.studyMaterial.findUnique({
         where: { id: materialId },

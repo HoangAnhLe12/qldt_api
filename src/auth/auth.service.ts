@@ -107,6 +107,9 @@ export class AuthService {
           classes: true, // Lấy danh sách các lớp học
         },
       });
+      if (!lecturer) {
+        throw new NotFoundException('Lecturer not found');
+      }
       return lecturer.classes;
     } else {
       const student = await this.prismaService.student.findUnique({
@@ -116,7 +119,11 @@ export class AuthService {
         },
       });
       if (!student) {
-        throw new NotFoundException('Lecturer not found');
+        throw new NotFoundException('Student not found');
+      }
+
+      if (!student.classes) {
+        return [];
       }
       return student.classes;
     }

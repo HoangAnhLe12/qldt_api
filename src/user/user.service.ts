@@ -40,6 +40,12 @@ export class UserService {
       // Lấy thông tin user
       if (body.userId) {
         userId = parseInt(body.userId, 10);
+        if (Number.isNaN(userId)) {
+          throw new HttpException(
+            'Khong tim thay nguoi dung nay',
+            HttpStatus.NOT_FOUND,
+          );
+        }
       }
 
       const user = await this.prismaService.user.findUnique({
@@ -90,6 +96,12 @@ export class UserService {
 
       const { sub } = decodedToken;
       const userId = parseInt(sub, 10);
+      if (Number.isNaN(userId)) {
+        throw new HttpException(
+          'Khong tim thay nguoi dung nay',
+          HttpStatus.NOT_FOUND,
+        );
+      }
 
       const user = await this.prismaService.user.findUnique({
         where: { id: userId },
@@ -175,6 +187,12 @@ export class UserService {
       }
       const { sub } = decodedToken;
       const userId = parseInt(sub, 10);
+      if (Number.isNaN(userId)) {
+        throw new HttpException(
+          'Khong tim thay nguoi dung nay',
+          HttpStatus.NOT_FOUND,
+        );
+      }
 
       const user = await this.prismaService.user.findUnique({
         where: { id: userId },
@@ -241,6 +259,12 @@ export class UserService {
         throw new HttpException('Permission denied', HttpStatus.FORBIDDEN);
       }
       const userId = parseInt(body.userId, 10);
+      if (Number.isNaN(userId)) {
+        throw new HttpException(
+          'Khong tim thay nguoi dung nay',
+          HttpStatus.NOT_FOUND,
+        );
+      }
 
       const userToUpdate = await this.prismaService.user.findUnique({
         where: { id: userId },
@@ -303,6 +327,12 @@ export class UserService {
         throw new HttpException('Permission denied', HttpStatus.FORBIDDEN);
       }
       const userId = parseInt(body.userId, 10);
+      if (Number.isNaN(userId)) {
+        throw new HttpException(
+          'Khong tim thay nguoi dung nay',
+          HttpStatus.NOT_FOUND,
+        );
+      }
 
       const userToUpdate = await this.prismaService.user.findUnique({
         where: { id: userId },
@@ -370,6 +400,12 @@ export class UserService {
         throw new HttpException('Permission denied', HttpStatus.FORBIDDEN);
       }
       const userId = parseInt(body.userId, 10);
+      if (Number.isNaN(userId)) {
+        throw new HttpException(
+          'Khong tim thay nguoi dung nay',
+          HttpStatus.NOT_FOUND,
+        );
+      }
 
       const userToUpdate = await this.prismaService.user.findUnique({
         where: { id: userId },

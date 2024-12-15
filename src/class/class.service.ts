@@ -117,9 +117,12 @@ export class ClassService {
 
       let classes;
     if (role === 'LECTURER') {
+      const lecturer = await this.prismaService.lecturer.findUnique({
+        where: { userId: sub },
+      })
         // Lấy danh sách lớp học của giảng viên
         classes = await this.prismaService.class.findMany({
-            where: { lecturerId: sub },
+            where: { lecturerId: lecturer.id },
             include: {
                 lecturer: {
                     include: {
@@ -428,8 +431,97 @@ export class ClassService {
     }
 }
 
-  async getClassInfo(getClassInfo: GetClassInfoDto) {
-    return getClassInfo;
+  async getClassInfo(body: GetClassInfoDto) {
+    try {
+      // Giải mã token
+      let decodedToken;
+      try {
+        decodedToken = this.jwtService.verify(body.token, { secret: process.env.JWT_SECRET });
+      } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+          throw new HttpException('Token has expired', HttpStatus.UNAUTHORIZED);
+        }
+        throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
+      }
+
+      const { sub, role } = decodedToken;
+
+      // Kiểm tra trạng thái kích hoạt của tài khoản
+      const user = await this.prismaService.user.findUnique({
+        where: { id: sub },
+      });
+
+      if (!user || !user.active) {
+        throw new HttpException('User account is inactive or not found', HttpStatus.FORBIDDEN);
+      }
+
+      const classId = parseInt(body.classId, 10);
+
+      if (Number.isNaN(classId)) {
+        throw new HttpException(
+          'Khong tim thay lop hoc nay',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      // Kiểm tra lớp học
+      const existingClass = await this.prismaService.class.findUnique({
+        where: { id: classId },
+        include: {
+          lecturer: {
+            include: {
+              user: true, // Bao gồm thông tin người dùng của giảng viên
+            },
+          },
+          students: true,
+        },
+      });
+
+      if (!existingClass) {
+        throw new HttpException('Class not found', HttpStatus.NOT_FOUND);
+      }
+
+      // Kiểm tra quyền truy cập
+      if (role === 'LECTURER') {
+        const lecturer = await this.prismaService.lecturer.findUnique({
+          where: { userId: sub },
+        });
+
+        if (!lecturer || existingClass.lecturerId !== lecturer.id) {
+          throw new HttpException('Access denied', HttpStatus.FORBIDDEN);
+        }
+      } else if (role === 'STUDENT') {
+        const student = await this.prismaService.student.findUnique({
+          where: { userId: sub },
+        });
+
+        if (!student || !existingClass.students.some(s => s.id === student.id)) {
+          throw new HttpException('Access denied', HttpStatus.FORBIDDEN);
+        }
+      } else {
+        throw new HttpException('Invalid role', HttpStatus.FORBIDDEN);
+      }
+
+      // Trả về thông tin lớp học
+      return {
+        code: 1000,
+        message: 'Class info retrieved successfully',
+        class: {
+          id: existingClass.id,
+          name: existingClass.name,
+          type: existingClass.type,
+          semester: existingClass.semester,
+          description: existingClass.description,
+          lecturerName: existingClass.lecturer?.user?.username || 'Unknown',
+          studentIds: existingClass.students.map(student => student.id),
+          status: existingClass.open,
+          timeStart: existingClass.timeStart,
+          timeEnd: existingClass.timeEnd,
+        },
+      };
+    } catch (error) {
+      throw new HttpException(error.message, error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   async getClassSchedule(token: string) {
