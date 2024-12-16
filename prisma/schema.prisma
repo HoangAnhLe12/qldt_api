@@ -90,18 +90,29 @@ model Class {
   lecturerId     Int
   lecturer       Lecturer         @relation(fields: [lecturerId], references: [id], onDelete: Cascade)
   students       Student[]        @relation("StudentClasses")
-  schedule       DateTime[]
   timeStart      DateTime
   timeEnd        DateTime
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   open           Boolean          @default(true)
+  sessions       ClassSession[]
   assignments    Assignment[]
   attendance     Attendance[]
   StudyMaterial  StudyMaterial[]
   AbsenceRequest AbsenceRequest[]
 
   @@map("classes")
+}
+
+model ClassSession {
+  id        Int    @id @default(autoincrement())
+  classId   Int // ID lớp học liên kết
+  class     Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+  dayOfWeek String // Ngày trong tuần (ví dụ: "Thứ 4", "Thứ 6")
+  startTime String // Giờ bắt đầu (ví dụ: "12h30")
+  endTime   String // Giờ kết thúc (ví dụ: "14h30")
+
+  @@map("class_sessions")
 }
 
 enum ClassType {

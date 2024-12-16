@@ -8,6 +8,8 @@ import {
   EditClassDto,
   GetClassInfoDto,
   GetClassListDto,
+  GetClassListsDto,
+  GetClassScheduleDto,
 } from './dto/class.dto';
 
 @Controller('class')
@@ -45,7 +47,12 @@ export class ClassController {
   }
 
   @Post('get-class-schedule')
-  getClassSchedule(@Body() token: GetClassListDto) {
-    return this.classService.getClassSchedule(token.token);
+  getClassSchedule(@Body() body: GetClassScheduleDto) {
+    return this.classService.getClassSchedule(body);
+  }
+
+  @Post('get-class-lists')
+  getClassLists(@Body() body: GetClassListsDto) {
+    return this.classService.getClassLists(body);
   }
 }

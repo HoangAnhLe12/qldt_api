@@ -30,6 +30,12 @@ export class CreateClassDto {
   @IsOptional()
   @MaxLength(255)
   description?: string;
+  @IsOptional()
+  sessions?: {
+    dayOfWeek: string; // Ví dụ: "Thứ 4"
+    startTime: string; // Ví dụ: "12h30"
+    endTime: string; // Ví dụ: "14h30"
+  }[];;
   @IsNotEmpty()
   @IsPositive()
   @IsNumber()
@@ -82,7 +88,11 @@ export class EditClassDto {
   @IsOptional()
   semester?: string;
   @IsOptional()
-  schedule?: Date[];
+  sessions?: {
+    dayOfWeek: string; // Ví dụ: "Thứ 4"
+    startTime: string; // Ví dụ: "12h30"
+    endTime: string; // Ví dụ: "14h30"
+  }[];;
   @IsOptional()
   @IsBoolean()
   classStatus?: boolean;
@@ -126,7 +136,10 @@ export class RegisterClassDto {
   @IsNotEmpty()
   token: string;
   @IsNotEmpty()
-  userId: string;
+  classId: string;
+}
+
+export class GetClassListsDto {
   @IsNotEmpty()
-  id: string;
+  token: string;
 }
