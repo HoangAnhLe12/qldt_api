@@ -15,22 +15,26 @@ datasource db {
 }
 
 model User {
-  id                Int                @id @default(autoincrement())
-  username          String
-  password          String
-  email             String             @unique
-  role              Role
-  token             String
-  active            Boolean            @default(false) // Trạng thái tài khoản
-  avatar            String // Link đến avatar (nếu cần)
-  phone             String? // Số điện thoại (nếu cần)
-  address           String? // Địa chỉ (nếu cần)
-  status            Boolean            @default(true)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  Lecturer          Lecturer?
-  Student           Student?
-  VerificationCodes VerificationCode[]
+  id                    Int                @id @default(autoincrement())
+  username              String
+  password              String
+  email                 String             @unique
+  role                  Role
+  token                 String
+  active                Boolean            @default(false) // Trạng thái tài khoản
+  avatar                String // Link đến avatar (nếu cần)
+  phone                 String? // Số điện thoại (nếu cần)
+  address               String? // Địa chỉ (nếu cần)
+  status                Boolean            @default(true)
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  Lecturer              Lecturer?
+  Student               Student?
+  VerificationCodes     VerificationCode[]
+  Notifications         Notification[]
+  sentConversations     Conversation[]     @relation("Sender") // Danh sách cuộc trò chuyện đã gửi
+  receivedConversations Conversation[]     @relation("Receiver") // Danh sách cuộc trò chuyện đã nhận
+  messages              Message[] // Danh sách tin nhắn gửi bởi người dùng
 
   @@map("users")
 }
@@ -204,4 +208,47 @@ enum LeaveStatus {
   DANG_XU_LY
   DA_DUYET
   TU_CHOI
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int // ID của người dùng nhận thông báo
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String // Nội dung thông báo
+  type      String // Loại thông báo (ví dụ: nghỉ học, điểm bài kiểm tra, ...)
+  relatedId Int? // ID liên quan đến thông báo (nếu cần)
+  read      Boolean  @default(false) // Trạng thái đã đọc
+  createdAt DateTime @default(now()) // Thời gian tạo thông báo
+
+  @@map("notifications")
+}
+
+model Conversation {
+  id              Int       @id @default(autoincrement())
+  senderId        Int // Người gửi tin nhắn
+  sender          User      @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId      Int // Người nhận tin nhắn
+  receiver        User      @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  senderBlocked   Boolean   @default(false) // Người nhận đã chặn người gửi
+  receiverBlocked Boolean   @default(false) // Người gửi đã chặn người nhận
+  messages        Message[] // Danh sách tin nhắn
+  createdAt       DateTime  @default(now()) // Thời gian tạo
+  updatedAt       DateTime  @updatedAt // Thời gian cập nhật gần nhất
+
+  @@unique([senderId, receiverId]) // Đảm bảo mỗi cặp chỉ có một cuộc trò chuyện
+  @@map("conversations")
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  conversationId Int // ID của cuộc trò chuyện
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       Int // Người gửi tin nhắn
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  content        String // Nội dung tin nhắn
+  fileUrl        String? // Link đến file đính kèm (nếu có)
+  read           Boolean      @default(false) // Trạng thái đã đọc
+  createdAt      DateTime     @default(now()) // Thời gian gửi tin nhắn
+
+  @@map("messages")
 }

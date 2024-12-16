@@ -2,14 +2,14 @@
 
 <ul>
 <li>Auth</li>
-<li>Class - getClassInfo && getClassSchedule</li>
+<li>Class - getClassSchedule</li>
 <li>Material</li>
 <li>Absence</li>
 <li>Attendance</li>
 <li>User</li>
 <li>Assignment</li>
-<li>Conversation - Not</li>
-<li>Notification - Not</li>
+<li>Conversation</li>
+<li>Notification</li>
 </ul>
 
 ## Project setup
