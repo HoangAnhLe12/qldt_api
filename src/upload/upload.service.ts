@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { extname } from 'path';
 import * as fs from 'fs';

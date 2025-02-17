@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Role } from '@prisma/client';
 import {
   IsNotEmpty,

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Body, Controller, Post } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 import {
